@@ -1,15 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
 
-function ImageUploader() {
+function ImageUploader({ onAnalysisStart, onAnalysisComplete }) {
   const [file, setFile] = useState(null);
-  const [response, setResponse] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const selectedFile = e.dataTransfer.files[0];
+      if (selectedFile.type.startsWith('image/')) {
+        setFile(selectedFile);
+        setPreviewUrl(URL.createObjectURL(selectedFile));
+      }
+    }
+  };
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
   };
 
   const getBase64 = (file) => {
@@ -23,18 +54,24 @@ function ImageUploader() {
 
   const analyzeImage = async () => {
     if (!file) {
-      setResponse("Por favor, sube una imagen primero.");
+      onAnalysisComplete("Please upload an image first.");
       return;
     }
 
-    setLoading(true);
-    setResponse("");
+    onAnalysisStart();
 
     try {
       const base64Image = await getBase64(file);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-      const prompt = "¿Qué opinas del atuendo en esta imagen? Analiza el estilo, los colores y las prendas. Dame consejos sobre cómo mejorar el atuendo para una entrevista de trabajo y para un look de día a día. Sé conciso y claro en tu respuesta.";
+      const prompt = `Analiza el atuendo en esta imagen. Proporciona comentarios sobre:
+      1. Estilo y estética general
+      2. Coordinación de colores
+      3. Ajuste y proporciones
+      4. Adecuación para la ocasión
+      5. Sugerencias de mejora
+      
+      Sé conciso, constructivo y a la moda en tu análisis.`;
 
       const result = await model.generateContent([
         prompt,
@@ -46,29 +83,172 @@ function ImageUploader() {
         },
       ]);
 
-      setResponse(result.response.text());
+      onAnalysisComplete(result.response.text());
     } catch (error) {
-      console.error("Error al llamar a la API de Gemini:", error);
-      setResponse("Ocurrió un error al analizar la imagen. Inténtalo de nuevo.");
-    } finally {
-      setLoading(false);
+      console.error("Error analyzing image:", error);
+      onAnalysisComplete("Error al analizar la imagen. Por favor, inténtalo de nuevo con una imagen diferente o verifica tu conexión.");
     }
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h1>Asistente de Imagen con Gemini</h1>
-      <input type="file" onChange={handleFileChange} accept="image/*" />
-      <button onClick={analyzeImage} disabled={loading} style={{ marginLeft: '10px' }}>
-        {loading ? 'Analizando...' : 'Analizar Imagen'}
-      </button>
-
-      {response && (
-        <div style={{ marginTop: '20px', border: '1px solid #ccc', padding: '10px', borderRadius: '8px', whiteSpace: 'pre-wrap' }}>
-          <h3>Análisis y Consejos:</h3>
-          <p>{response}</p>
-        </div>
-      )}
+    <div className="image-uploader">
+      <div 
+        className={`drop-zone ${isDragging ? 'drag-over' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={triggerFileInput}
+      >
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept="image/*"
+          style={{ display: 'none' }}
+        />
+        
+        {previewUrl ? (
+          <div className="image-preview">
+            <img src={previewUrl} alt="Preview" />
+            <div className="overlay">
+              <span>Haz clic o arrastra una imagen diferente</span>
+            </div>
+          </div>
+        ) : (
+          <div className="upload-prompt">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <h3>Arrastra y suelta tu foto de atuendo aquí</h3>
+            <p>o haz clic para buscar archivos</p>
+            <p className="file-types">Formatos: JPG, PNG, WEBP (Máx. 10MB)</p>
+          </div>
+        )}
+      </div>
+      
+      <div className="actions">
+        <button 
+          onClick={analyzeImage} 
+          disabled={!file}
+          className="analyze-button"
+        >
+          Analizar Mi Atuendo
+        </button>
+      </div>
+      
+      <style jsx>{`
+        .image-uploader {
+          width: 100%;
+          max-width: 600px;
+          margin: 0 auto;
+        }
+        
+        .drop-zone {
+          border: 2px dashed #d1d5db;
+          border-radius: 12px;
+          padding: 2rem;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          background-color: #f9fafb;
+          margin-bottom: 1.5rem;
+          min-height: 300px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .drop-zone.drag-over {
+          border-color: var(--primary-color);
+          background-color: rgba(108, 99, 255, 0.05);
+        }
+        
+        .upload-prompt {
+          color: var(--text-light);
+        }
+        
+        .upload-prompt svg {
+          margin-bottom: 1rem;
+          color: var(--primary-color);
+        }
+        
+        .upload-prompt h3 {
+          margin: 0.5rem 0;
+          color: var(--text-color);
+        }
+        
+        .file-types {
+          font-size: 0.875rem;
+          margin-top: 0.5rem;
+          color: var(--text-light);
+        }
+        
+        .image-preview {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          max-height: 400px;
+          overflow: hidden;
+          border-radius: 8px;
+        }
+        
+        .image-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        
+        .overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+        
+        .image-preview:hover .overlay {
+          opacity: 1;
+        }
+        
+        .actions {
+          display: flex;
+          justify-content: center;
+        }
+        
+        .analyze-button {
+          padding: 0.75rem 2rem;
+          font-size: 1.1rem;
+          font-weight: 600;
+          border-radius: 50px;
+          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+          color: white;
+          border: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 6px rgba(108, 99, 255, 0.2);
+        }
+        
+        .analyze-button:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(108, 99, 255, 0.3);
+        }
+        
+        .analyze-button:disabled {
+          background: #e5e7eb;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+      `}</style>
     </div>
   );
 }
