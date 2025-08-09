@@ -2,23 +2,26 @@ import React, { useState } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Reemplaza "TU_CLAVE_AQUI" con tu clave de API de Gemini.
-const API_KEY = "TU_CLAVE_AQUI";
+const API_KEY = "AIzaSyAa_b9slmpPALrYu0FsiNRU-b4CsIeyXw4";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const styles = {
   container: {
-    padding: '40px',
-    fontFamily: 'Arial, sans-serif',
+    padding: '2.5rem',
+    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
     textAlign: 'center',
-    maxWidth: '700px',
-    margin: '20px auto',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '12px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    maxWidth: '1000px',
+    margin: '2rem auto',
+    backgroundColor: '#ffffff',
+    borderRadius: '16px',
+    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.04)',
+    border: '1px solid rgba(0, 0, 0, 0.05)',
   },
   title: {
-    color: '#333',
-    marginBottom: '20px',
+    color: '#1a1a1a',
+    margin: '0 0 1.5rem 0',
+    fontSize: '1.8rem',
+    fontWeight: '700',
   },
   uploadArea: {
     display: 'flex',
@@ -29,9 +32,20 @@ const styles = {
   fileInput: {
     marginBottom: '15px',
     padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
+    border: '2px dashed #e0e6ed',
+    borderRadius: '14px',
+    padding: '3rem 2rem',
+    margin: '0 auto 2rem',
     cursor: 'pointer',
+    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+    backgroundColor: '#f8fafc',
+    maxWidth: '600px',
+  },
+  uploadAreaHover: {
+    borderColor: '#3b82f6',
+    backgroundColor: '#f0f7ff',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 6px 12px rgba(59, 130, 246, 0.1)',
   },
   button: {
     padding: '12px 25px',
@@ -44,8 +58,19 @@ const styles = {
     transition: 'background-color 0.3s ease',
   },
   buttonDisabled: {
-    backgroundColor: '#cccccc',
+    backgroundColor: '#cbd5e1',
     cursor: 'not-allowed',
+    boxShadow: 'none',
+    transform: 'none',
+  },
+  buttonNotDisabledHover: {
+    backgroundColor: '#2563eb',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 8px rgba(59, 130, 246, 0.4)',
+  },
+  buttonNotDisabledActive: {
+    transform: 'translateY(0)',
+    boxShadow: '0 2px 5px rgba(59, 130, 246, 0.3)',
   },
   previewContainer: {
     marginBottom: '30px',
@@ -58,12 +83,18 @@ const styles = {
     color: '#555',
     marginBottom: '10px',
   },
-  imagePreview: {
+  previewImage: {
     maxWidth: '100%',
     maxHeight: '400px',
-    objectFit: 'contain',
-    borderRadius: '6px',
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+    margin: '1.5rem 0',
+    borderRadius: '12px',
+    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.08)',
+    border: '1px solid rgba(0, 0, 0, 0.05)',
+    transition: 'all 0.3s ease',
+  },
+  previewImageHover: {
+    transform: 'scale(1.01)',
+    boxShadow: '0 12px 25px rgba(0, 0, 0, 0.12)',
   },
   responseContainer: {
     marginTop: '30px',
@@ -73,9 +104,11 @@ const styles = {
     backgroundColor: 'white',
     textAlign: 'left',
   },
-  responseTitle: {
-    color: '#333',
-    marginBottom: '15px',
+  uploadIcon: {
+    fontSize: '3.5rem',
+    color: '#94a3b8',
+    marginBottom: '1rem',
+    transition: 'all 0.3s ease',
   },
   colorPaletteSection: {
     marginTop: '20px',
@@ -108,6 +141,125 @@ const styles = {
     marginTop: '5px',
     fontSize: '12px',
     color: '#555',
+  },
+  colorPalette: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+    gap: '1.5rem',
+    margin: '2rem 0',
+    padding: '0 0.5rem',
+  },
+  colorCard: {
+    background: '#fff',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+    transition: 'all 0.3s ease',
+    ':hover': {
+      transform: 'translateY(-4px)',
+      boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+    },
+  },
+  colorSwatch: {
+    height: '120px',
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'flex-end',
+    padding: '1rem',
+  },
+  colorOverlay: {
+    position: 'absolute',
+    bottom: '0',
+    left: '0',
+    right: '0',
+    background: 'rgba(255,255,255,0.9)',
+    padding: '0.75rem',
+    textAlign: 'center',
+  },
+  colorHex: {
+    fontFamily: '\'Fira Code\', monospace',
+    fontSize: '0.8rem',
+    fontWeight: '500',
+    color: '#333',
+    letterSpacing: '0.5px',
+  },
+  colorInfo: {
+    padding: '1rem',
+    textAlign: 'left',
+  },
+  colorName: {
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    color: '#1a1a1a',
+    margin: '0 0 0.25rem 0',
+  },
+  colorCode: {
+    fontSize: '0.8rem',
+    color: '#666',
+    fontFamily: '\'Fira Code\', monospace',
+    opacity: '0.8',
+  },
+  colorSwatchHover: {
+    transform: 'translateY(-3px)',
+    boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
+  },
+  colorInfo: {
+    padding: '0.75rem',
+    backgroundColor: 'white',
+  },
+  colorName: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: '0.25rem',
+  },
+  colorCode: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    fontFamily: '\'Fira Code\', monospace',
+  },
+  colorGroup: {
+    marginBottom: '2.5rem',
+  },
+  colorGroupTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    color: '#1a1a1a',
+    margin: '2.5rem 0 1.5rem',
+    paddingBottom: '0.75rem',
+    borderBottom: '2px solid #f0f0f0',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    position: 'relative',
+    '::after': {
+      content: '""',
+      position: 'absolute',
+      bottom: '-2px',
+      left: '0',
+      width: '60px',
+      height: '2px',
+      background: '#3b82f6',
+    },
+  },
+  loading: {
+    margin: '2rem 0',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '1rem',
+    color: '#64748b',
+  },
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '3px solid rgba(59, 130, 246, 0.2)',
+    borderTopColor: '#3b82f6',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
+  '@keyframes spin': {
+    to: { transform: 'rotate(360deg)' },
   },
 };
 
@@ -198,11 +350,25 @@ function ImageUploader() {
   };
 
   const renderColors = (colors) => (
-    <div style={styles.colorSwatchGroup}>
+    <div style={styles.colorPalette}>
       {colors.map((color, index) => (
-        <div key={index} style={styles.colorSwatchWrapper}>
-          <div style={{ ...styles.colorSwatch, backgroundColor: color.hex }}></div>
-          <span style={styles.colorName}>{color.nombre}</span>
+        <div key={index} className="color-card" style={styles.colorCard}>
+          <div 
+            className="color-swatch"
+            style={{
+              ...styles.colorSwatch,
+              backgroundColor: color.hex,
+              background: `linear-gradient(135deg, ${color.hex} 0%, ${color.hex} 50%, ${color.hex}99 100%)`
+            }}
+          >
+            <div style={styles.colorOverlay}>
+              <span style={styles.colorHex}>{color.hex}</span>
+            </div>
+          </div>
+          <div style={styles.colorInfo}>
+            <p style={styles.colorName}>{color.nombre}</p>
+            <p style={styles.colorCode}>{color.hex}</p>
+          </div>
         </div>
       ))}
     </div>
