@@ -64,14 +64,22 @@ function ImageUploader({ onAnalysisStart, onAnalysisComplete }) {
       const base64Image = await getBase64(file);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-      const prompt = `Analiza el atuendo en esta imagen. Proporciona comentarios sobre:
-      1. Estilo y estética general
-      2. Coordinación de colores
-      3. Ajuste y proporciones
-      4. Adecuación para la ocasión
-      5. Sugerencias de mejora
+      const prompt = `Analiza el atuendo en esta imagen y proporciona un análisis detallado que incluya:
+      1. Descripción general del estilo (150-200 palabras)
+      2. Análisis de colores y combinaciones
+      3. Evaluación de silueta y ajuste
+      4. Ocasiones para las que es apropiado
+      5. Tres colores recomendados en formato hexadecimal (ej: #FF5733) que combinen con la imagen
+      6. Sugerencias de mejora específicas y consejos de estilismo
       
-      Sé conciso, constructivo y a la moda en tu análisis.`;
+      Devuelve la respuesta en formato JSON con las claves: "analisis", "colores" (array de 3 colores en HEX) y "sugerencias".
+      
+      Ejemplo de respuesta:
+      {
+        "analisis": "El atuendo presenta un estilo casual contemporáneo con un toque sofisticado...",
+        "colores": ["#4A90E2", "#50E3C2", "#F5A623"],
+        "sugerencias": "Para elevar este look, considera agregar una chaqueta de mezclilla..."
+      }`;
 
       const result = await model.generateContent([
         prompt,
@@ -83,7 +91,21 @@ function ImageUploader({ onAnalysisStart, onAnalysisComplete }) {
         },
       ]);
 
-      onAnalysisComplete(result.response.text());
+      try {
+        // Intentar parsear la respuesta como JSON
+        const responseText = result.response.text().trim();
+        const jsonStart = responseText.indexOf('{');
+        const jsonEnd = responseText.lastIndexOf('}') + 1;
+        const jsonResponse = JSON.parse(responseText.substring(jsonStart, jsonEnd));
+        onAnalysisComplete(jsonResponse);
+      } catch (error) {
+        console.error("Error parsing JSON response:", error);
+        onAnalysisComplete({
+          analisis: result.response.text(),
+          colores: ["#6c63ff", "#4a45b1", "#a29bfe"],
+          sugerencias: "No se pudieron obtener recomendaciones de color específicas."
+        });
+      }
     } catch (error) {
       console.error("Error analyzing image:", error);
       onAnalysisComplete("Error al analizar la imagen. Por favor, inténtalo de nuevo con una imagen diferente o verifica tu conexión.");

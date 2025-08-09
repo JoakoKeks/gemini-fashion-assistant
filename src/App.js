@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ImageUploader from './ImageUploader';
 import './App.css';
 
 function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [recommendedColors, setRecommendedColors] = useState([]);
 
   const handleAnalysisComplete = (result) => {
-    setAnalysisResult(result);
+    setAnalysisResult(result.analisis);
+    setRecommendedColors(Array.isArray(result.colores) ? result.colores : []);
     setIsAnalyzing(false);
   };
 
@@ -38,6 +40,24 @@ function App() {
             <h2>Análisis de Moda</h2>
             <div className="result-content">
               {analysisResult}
+              
+              {recommendedColors.length > 0 && (
+                <div className="color-recommendations">
+                  <h3>Colores recomendados:</h3>
+                  <div className="color-palette">
+                    {recommendedColors.map((color, index) => (
+                      <div 
+                        key={index} 
+                        className="color-swatch"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      >
+                        <span className="color-code">{color}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
