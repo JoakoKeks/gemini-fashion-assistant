@@ -10,7 +10,8 @@ const styles = {
     padding: '2.5rem',
     fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
     textAlign: 'center',
-    maxWidth: '1000px',
+    maxWidth: '1200px',
+    width: '95%',
     margin: '2rem auto',
     backgroundColor: '#ffffff',
     borderRadius: '16px',
@@ -18,10 +19,26 @@ const styles = {
     border: '1px solid rgba(0, 0, 0, 0.05)',
   },
   title: {
-    color: '#1a1a1a',
-    margin: '0 0 1.5rem 0',
-    fontSize: '1.8rem',
-    fontWeight: '700',
+    margin: '0 0 0.25rem 0',
+    fontSize: '4rem',
+    fontWeight: '800',
+    letterSpacing: '-1.5px',
+    display: 'inline-block',
+    lineHeight: '1.1',
+  },
+  iaText: {
+    background: 'linear-gradient(45deg, #3b82f6, #8b5cf6)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    display: 'inline-block',
+  },
+  subtitle: {
+    color: '#4b5563',
+    fontSize: '1.5rem',
+    maxWidth: '800px',
+    margin: '0 auto 3rem',
+    lineHeight: '1.5',
+    fontWeight: '400',
   },
   uploadArea: {
     display: 'flex',
@@ -143,13 +160,16 @@ const styles = {
     color: '#555',
   },
   colorPalette: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-    gap: '1.5rem',
-    margin: '2rem 0',
-    padding: '0 0.5rem',
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: '1rem',
+    margin: '1.5rem 0',
+    padding: '0.5rem',
   },
   colorCard: {
+    flex: '0 0 160px',
+    maxWidth: '100%',
     background: '#fff',
     borderRadius: '12px',
     overflow: 'hidden',
@@ -220,6 +240,9 @@ const styles = {
   },
   colorGroup: {
     marginBottom: '2.5rem',
+    '&:last-child': {
+      marginBottom: '0',
+    },
   },
   colorGroupTitle: {
     fontSize: '1.1rem',
@@ -376,8 +399,14 @@ function ImageUploader() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Asistente de Imagen con Gemini</h1>
-      <p>Sube una foto y recibe un análisis de colorimetría con recomendaciones de colores.</p>
+      <h1 style={styles.title}>
+        <span style={{color: '#1a1a1a'}}>Esenc</span>
+        <span style={styles.iaText}>IA</span>
+      </h1>
+      <p style={styles.subtitle}>
+        Descubre tu paleta de colores personalizada con inteligencia artificial. 
+        Sube una foto y recibe un análisis detallado de colores que mejor se adaptan a ti.
+      </p>
       <div style={styles.uploadArea}>
         <input type="file" onChange={handleFileChange} accept="image/*" style={styles.fileInput} />
         <button
