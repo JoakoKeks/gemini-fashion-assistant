@@ -48,7 +48,6 @@ const styles = {
     },
     fileInput: {
         marginBottom: '15px',
-        padding: '10px',
         border: '2px dashed #e0e6ed',
         borderRadius: '14px',
         padding: '3rem 2rem',
@@ -183,28 +182,9 @@ const styles = {
         letterSpacing: '0.5px',
     },
     colorInfo: {
-        padding: '1rem',
-        textAlign: 'left',
-    },
-    colorName: {
-        fontSize: '0.95rem',
-        fontWeight: '600',
-        color: '#1a1a1a',
-        margin: '0 0 0.25rem 0',
-    },
-    colorCode: {
-        fontSize: '0.8rem',
-        color: '#666',
-        fontFamily: '\'Fira Code\', monospace',
-        opacity: '0.8',
-    },
-    colorSwatchHover: {
-        transform: 'translateY(-3px)',
-        boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
-    },
-    colorInfo: {
         padding: '0.75rem',
         backgroundColor: 'white',
+        textAlign: 'left',
     },
     colorName: {
         fontSize: '0.9rem',
@@ -341,7 +321,6 @@ function ImageUploader() {
                 model: "gemini-1.5-flash"
             });
 
-            // **PROMPT MEJORADO PARA RESPONDER EN SEGUNDA PERSONA Y ACEPTAR IMÁGENES DE DIVERSA CALIDAD**
             const prompt = `Actúa como tu estilista personal y experto en colorimetría. 
                       Por favor, haz el mejor análisis posible con la imagen que se te ha proporcionado.
                       Tienes que hablarle a la persona directamente usando la segunda persona (ej. "tú, tu").
@@ -393,11 +372,27 @@ function ImageUploader() {
             ]);
 
             const textResponse = result.response?.text();
-            const jsonResponse = JSON.parse(textResponse.replace(/ ```json\n|\n\`\`\`/g, ''));
-            setResponse(jsonResponse);
+            
+            // Log de la respuesta cruda para depuración
+            console.log("Respuesta cruda de la IA:", textResponse); 
+
+            if (!textResponse) {
+                setError("No se recibió una respuesta de la IA.");
+                return;
+            }
+
+            try {
+                // Elimina las etiquetas de código y parsea el JSON
+                const jsonResponse = JSON.parse(textResponse.replace(/```json\n|\n```/g, ''));
+                setResponse(jsonResponse);
+            } catch (parseError) {
+                console.error("Error al parsear la respuesta JSON:", parseError);
+                setError("La IA no devolvió un formato JSON válido. Intenta con otra imagen o revisa el prompt.");
+            }
+
         } catch (err) {
-            console.error("Error al analizar la imagen:", err);
-            setError("Ocurrió un error al analizar la imagen. Asegúrate de que la clave de la API es correcta y la imagen es de buena calidad.");
+            console.error("Error general en analyzeImage:", err);
+            setError(`Ocurrió un error al analizar la imagen: ${err.message}`);
             setResponse(null);
         } finally {
             setLoading(false);
@@ -429,7 +424,6 @@ function ImageUploader() {
         </div>
     );
     
-    // Función para renderizar las recomendaciones de prendas con la estructura de objetos
     const renderRecommendationsWithImages = (prendas) => (
       <div style={styles.recommendationsContainer}>
           <h4 style={styles.recommendationTitle}>Recomendaciones de Prendas</h4>
