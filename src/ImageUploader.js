@@ -265,13 +265,6 @@ const styles = {
     recommendationText: {
         flexGrow: 1,
     },
-    recommendationImage: {
-        maxWidth: '100px',
-        maxHeight: '100px',
-        borderRadius: '8px',
-        objectFit: 'contain',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    },
 };
 
 function ImageUploader() {
@@ -424,20 +417,13 @@ function ImageUploader() {
         </div>
     );
     
+    // Función renderRecommendationsWithImages modificada para no mostrar imágenes
     const renderRecommendationsWithImages = (prendas) => (
       <div style={styles.recommendationsContainer}>
           <h4 style={styles.recommendationTitle}>Recomendaciones de Prendas</h4>
           {prendas.map((prenda, index) => (
               <div key={index} style={styles.recommendationItem}>
                   <p style={styles.recommendationText}>{prenda.descripcion}</p>
-                  {prenda.imagen_url && (
-                      <img src={prenda.imagen_url} alt={prenda.descripcion} style={styles.recommendationImage} />
-                  )}
-                  {!prenda.imagen_url && (
-                      <div style={{ width: '100px', height: '100px', backgroundColor: '#eee', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#777', textAlign: 'center' }}>
-                          Imagen no disponible
-                      </div>
-                  )}
               </div>
           ))}
       </div>
