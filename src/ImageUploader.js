@@ -1,7 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+<<<<<<< Updated upstream
 
 const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
+=======
+// Reemplaza "TU_CLAVE_AQUI" con tu clave de API de Gemini.
+const API_KEY = process.env.REACT_APP_KEY;
+const genAI = new GoogleGenerativeAI(API_KEY);
+>>>>>>> Stashed changes
 
 function ImageUploader({ onAnalysisStart, onAnalysisComplete }) {
   const [file, setFile] = useState(null);

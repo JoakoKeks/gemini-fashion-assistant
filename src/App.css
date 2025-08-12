@@ -20,8 +20,16 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
+<<<<<<< Updated upstream
   color: var(--text-color);
   background-color: var(--background-light);
+=======
+  color: #333;
+  background: linear-gradient(135deg, #2516f0 0%, #050608 100%);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+>>>>>>> Stashed changes
 }
 
 /* App Container */
