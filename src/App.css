@@ -158,3 +158,83 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Fira Code', 'Courier New', monospace;
   font-weight: 500;
 }
+
+/* responsive.css */
+/* Estilos para dispositivos móviles: ancho máximo 480px */
+
+@media (max-width: 480px) {
+
+  /* Contenedor principal */
+  .container {
+    padding: 1rem 0.5rem !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+  }
+
+  /* Título principal */
+  .title {
+    font-size: 2rem !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Subtítulo */
+  .subtitle {
+    font-size: 1rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Área de subida de archivos */
+  .uploadArea {
+    max-width: 100% !important;
+    margin: 1.5rem auto !important;
+    width: 95% !important;
+  }
+
+  /* Input tipo file */
+  input[type="file"] {
+    padding: 2rem 1rem !important;
+    font-size: 1rem !important;
+  }
+
+  /* Botón analizar */
+  button {
+    width: 100%;
+    padding: 0.8rem 1.5rem !important;
+    font-size: 1rem !important;
+  }
+
+  /* Vista previa imagen */
+  img {
+    max-height: 250px !important;
+    width: auto !important;
+    margin: 0 auto !important;
+    display: block !important;
+  }
+
+  /* Contenedor resultados */
+  .responseContainer {
+    padding: 1rem !important;
+  }
+
+  /* Paleta de colores */
+  .colorPalette {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem 1rem !important;
+  }
+
+  /* Tarjetas de colores */
+  .colorCard {
+    width: 100px !important;
+  }
+
+  /* Botón flotante del chat */
+  .chatButton {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 1.5rem !important;
+    bottom: 1rem !important;
+    right: 1rem !important;
+  }
+}
