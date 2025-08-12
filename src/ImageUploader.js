@@ -1,61 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import Chatbot from './Chatbot';
 
-// Reemplaza "GOOGLE_API_KEY" con tu el nombre que tenga tu variable de entorno.
-const API_KEY = "GOOGLE_API_KEY";
+// Usa la clave de API desde las variables de entorno
+const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const styles = {
     container: {
-        padding: '2.5rem',
-        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+        padding: '3rem 1.5rem',
+        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         textAlign: 'center',
-        maxWidth: '1200px',
-        width: '95%',
-        margin: '2rem auto',
-        backgroundColor: '#ffffff',
-        borderRadius: '16px',
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.04)',
-        border: '1px solid rgba(0, 0, 0, 0.05)',
+        maxWidth: '1000px',
+        width: '100%',
+        margin: '0 auto',
+        minHeight: '100vh',
+        backgroundColor: '#f8f9ff',
+        color: '#2d3748',
     },
     title: {
-        margin: '0 0 0.25rem 0',
-        fontSize: '4rem',
+        margin: '0 0 0.5rem 0',
+        fontSize: '3.5rem',
         fontWeight: '800',
         letterSpacing: '-1.5px',
         display: 'inline-block',
         lineHeight: '1.1',
+        marginBottom: '1rem',
+        color: '#1a1a1a', // Ensures the base color is black
     },
     iaText: {
-        background: 'linear-gradient(45deg, #3b82f6, #8b5cf6)',
+        background: 'linear-gradient(45deg, #7c3aed, #c026d3)',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
         display: 'inline-block',
+        fontWeight: 800,
+        marginLeft: '4px',
     },
     subtitle: {
-        color: '#4b5563',
-        fontSize: '1.5rem',
-        maxWidth: '800px',
+        color: '#4a5568',
+        fontSize: '1.25rem',
+        maxWidth: '700px',
         margin: '0 auto 3rem',
-        lineHeight: '1.5',
+        lineHeight: '1.6',
         fontWeight: '400',
+        opacity: 0.9,
     },
     uploadArea: {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        marginBottom: '30px',
+        margin: '2rem 0 3rem',
+        width: '100%',
+        maxWidth: '600px',
+        margin: '0 auto',
     },
     fileInput: {
-        marginBottom: '15px',
-        border: '2px dashed #e0e6ed',
-        borderRadius: '14px',
-        padding: '3rem 2rem',
-        margin: '0 auto 2rem',
+        width: '100%',
+        padding: '4rem 2rem',
+        textAlign: 'center',
+        border: '2px dashed #c7d2fe',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(238, 242, 255, 0.5)',
+        color: '#4f46e5',
+        fontSize: '1.1rem',
+        fontWeight: '500',
         cursor: 'pointer',
-        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-        backgroundColor: '#f8fafc',
-        maxWidth: '600px',
+        transition: 'all 0.3s ease',
+        marginBottom: '1.5rem',
+        position: 'relative',
+        overflow: 'hidden',
+        '&:hover': {
+            borderColor: '#818cf8',
+            backgroundColor: 'rgba(238, 242, 255, 0.8)',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 20px rgba(99, 102, 241, 0.15)',
+        },
+        '&:active': {
+            transform: 'translateY(0)',
+            boxShadow: '0 2px 10px rgba(99, 102, 241, 0.1)',
+        },
     },
     uploadAreaHover: {
         borderColor: '#3b82f6',
@@ -64,65 +87,88 @@ const styles = {
         boxShadow: '0 6px 12px rgba(59, 130, 246, 0.1)',
     },
     button: {
-        padding: '12px 25px',
-        backgroundColor: '#007bff',
+        padding: '0.875rem 2.5rem',
+        backgroundColor: '#4f46e5',
         color: 'white',
         border: 'none',
-        borderRadius: '8px',
+        borderRadius: '12px',
         cursor: 'pointer',
-        fontSize: '16px',
-        transition: 'background-color 0.3s ease',
-    },
-    buttonDisabled: {
-        backgroundColor: '#cbd5e1',
-        cursor: 'not-allowed',
-        boxShadow: 'none',
-        transform: 'none',
-    },
-    buttonNotDisabledHover: {
-        backgroundColor: '#2563eb',
-        transform: 'translateY(-1px)',
-        boxShadow: '0 4px 8px rgba(59, 130, 246, 0.4)',
-    },
-    buttonNotDisabledActive: {
-        transform: 'translateY(0)',
-        boxShadow: '0 2px 5px rgba(59, 130, 246, 0.3)',
+        fontSize: '1.1rem',
+        fontWeight: '600',
+        transition: 'all 0.3s ease',
+        boxShadow: '0 4px 14px rgba(79, 70, 229, 0.3)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&:hover:not(:disabled)': {
+            backgroundColor: '#4338ca',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 6px 20px rgba(79, 70, 229, 0.4)',
+        },
+        '&:active:not(:disabled)': {
+            transform: 'translateY(0)',
+            boxShadow: '0 2px 10px rgba(79, 70, 229, 0.3)',
+        },
+        '&:disabled': {
+            backgroundColor: '#c7d2fe',
+            cursor: 'not-allowed',
+            boxShadow: 'none',
+            transform: 'none',
+        },
     },
     previewContainer: {
-        margin: '1.5rem auto',
+        margin: '2rem auto',
         textAlign: 'center',
         maxWidth: '100%',
-        padding: '0 1rem',
+        padding: '1.5rem',
+        backgroundColor: 'white',
+        borderRadius: '16px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+        border: '1px solid #e2e8f0',
     },
     previewTitle: {
         fontSize: '1.25rem',
-        color: '#333',
-        marginBottom: '0.75rem',
-        fontWeight: '500',
+        color: '#4f46e5',
+        marginBottom: '1rem',
+        fontWeight: '600',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '0.5rem',
     },
     imagePreview: {
         maxWidth: '100%',
-        maxHeight: '300px',
+        maxHeight: '350px',
         width: 'auto',
         height: 'auto',
-        borderRadius: '10px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        border: '1px solid rgba(0,0,0,0.05)',
-        objectFit: 'contain',
+        borderRadius: '12px',
+        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+        border: '1px solid rgba(99, 102, 241, 0.2)',
+        objectFit: 'cover',
         margin: '0 auto',
         display: 'block',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        },
     },
     previewImageHover: {
         transform: 'scale(1.01)',
         boxShadow: '0 12px 25px rgba(0, 0, 0, 0.12)',
     },
     responseContainer: {
-        marginTop: '30px',
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        padding: '20px',
+        marginTop: '3rem',
+        border: '1px solid #e2e8f0',
+        borderRadius: '16px',
+        padding: '2rem',
         backgroundColor: 'white',
         textAlign: 'left',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0 15px 35px rgba(0, 0, 0, 0.08)',
+        },
     },
     uploadIcon: {
         fontSize: '3.5rem',
@@ -131,31 +177,102 @@ const styles = {
         transition: 'all 0.3s ease',
     },
     colorPaletteSection: {
-        marginTop: '20px',
+        marginTop: '2rem',
+        padding: '1.5rem 0',
+        backgroundColor: '#f8fafc',
+        borderRadius: '12px',
+        marginBottom: '2rem',
+        border: '1px solid #e2e8f0',
+        width: '100%',
+        boxSizing: 'border-box',
+        position: 'relative',
+        zIndex: 1,
+    },
+    chatButton: {
+        position: 'fixed',
+        bottom: '2rem',
+        right: '2rem',
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        backgroundColor: '#7c3aed',
+        color: 'white',
+        border: 'none',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.75rem',
+        zIndex: 999,
+        transition: 'all 0.3s ease',
+        '&:hover': {
+            backgroundColor: '#6d28d9',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
+        },
+        '&:active': {
+            transform: 'translateY(1px)',
+        },
     },
     colorPaletteTitle: {
-        fontWeight: 'bold',
-        marginBottom: '10px',
+        fontSize: '1.25rem',
+        fontWeight: '600',
+        margin: '0 0 1rem 1.5rem',
+        color: '#1a1a1a',
+        textAlign: 'left',
+        position: 'relative',
+        paddingBottom: '0.5rem',
+        '&:after': {
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            bottom: 0,
+            width: '40px',
+            width: '60px',
+            height: '3px',
+            background: 'linear-gradient(90deg, #4f46e5, #818cf8)',
+            borderRadius: '3px',
+        },
     },
     colorPalette: {
         display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: '1rem',
-        margin: '1.5rem 0',
-        padding: '0.5rem',
+        flexWrap: 'nowrap',
+        justifyContent: 'flex-start',
+        alignItems: 'stretch',
+        gap: '1.25rem',
+        margin: '0.5rem 0 1.5rem',
+        padding: '1rem 1.5rem',
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+        '&::-webkit-scrollbar': {
+            display: 'none',
+        },
+        '& > *': {
+            flex: '0 0 auto',
+            margin: '0',
+        },
+        '@media (max-width: 768px)': {
+            padding: '1rem',
+            gap: '0.75rem',
+        },
     },
     colorCard: {
-        flex: '0 0 160px',
-        maxWidth: '100%',
+        width: '140px',
+        flex: '0 0 auto',
         background: '#fff',
         borderRadius: '12px',
         overflow: 'hidden',
         boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
         transition: 'all 0.3s ease',
+        margin: 0,
         ':hover': {
             transform: 'translateY(-4px)',
             boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+        },
+        '@media (max-width: 768px)': {
+            width: '120px',
         },
     },
     colorSwatch: {
@@ -253,21 +370,29 @@ const styles = {
         marginBottom: '1.5rem',
     },
     recommendationItem: {
-        backgroundColor: '#f8fafc',
+        backgroundColor: 'white',
         padding: '1.5rem',
         borderRadius: '12px',
         marginBottom: '1rem',
-        borderLeft: '4px solid #3b82f6',
+        borderLeft: '4px solid #4f46e5',
         display: 'flex',
         alignItems: 'center',
         gap: '1rem',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+            transform: 'translateX(4px)',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02)',
+        },
     },
     recommendationText: {
         flexGrow: 1,
     },
 };
 
-function ImageUploader() {
+const ImageUploader = () => {
+    const [showChatbot, setShowChatbot] = useState(false);
+    const [recommendedColors, setRecommendedColors] = useState([]);
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
@@ -376,6 +501,11 @@ function ImageUploader() {
                 const cleanTextResponse = textResponse.replace(/```json\n|\n```|```/g, '').replace(/\*\*(.*?)\*\*/g, '$1');
                 const jsonResponse = JSON.parse(cleanTextResponse);
                 setResponse(jsonResponse);
+        // Extract colors from the response for the chatbot
+        if (jsonResponse.paleta_colores) {
+            const colors = Object.values(jsonResponse.paleta_colores).flat();
+            setRecommendedColors(colors);
+        }
             } catch (parseError) {
                 console.error("Error al parsear la respuesta JSON:", parseError);
                 setError("La IA no devolvió un formato JSON válido. Intenta con otra imagen o revisa el prompt.");
@@ -430,8 +560,16 @@ function ImageUploader() {
     return (
         <div style={styles.container}>
             <h1 style={styles.title}>
-                <span style={{ color: '#1a1a1a' }}>Esenc</span>
-                <span style={styles.iaText}>IA</span>
+                <span style={{ color: '#1a1a1a', fontWeight: 800 }}>Esenc</span>
+                <span style={{ 
+                    background: 'linear-gradient(45deg, #7c3aed, #c026d3)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    display: 'inline-block',
+                    fontWeight: 800,
+                    marginLeft: '4px',
+                    textTransform: 'uppercase'
+                }}>ia</span>
             </h1>
             <p style={styles.subtitle}>
                 Descubre tu paleta de colores personalizada con inteligencia artificial.
@@ -471,6 +609,23 @@ function ImageUploader() {
                     </div>
                     {response.prendas_recomendadas && renderRecommendationsWithImages(response.prendas_recomendadas)}
                 </div>
+            )}
+            
+            {/* Chatbot Toggle Button */}
+            <button 
+                onClick={() => setShowChatbot(!showChatbot)}
+                style={styles.chatButton}
+                aria-label="Abrir chat de asesoría de estilo"
+            >
+                💬
+            </button>
+            
+            {/* Chatbot Component */}
+            {showChatbot && (
+                <Chatbot 
+                    colors={recommendedColors} 
+                    onClose={() => setShowChatbot(false)} 
+                />
             )}
         </div>
     );
