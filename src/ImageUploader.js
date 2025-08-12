@@ -314,45 +314,42 @@ function ImageUploader() {
                 model: "gemini-1.5-flash"
             });
 
-            const prompt = `Actúa como tu estilista personal y experto en colorimetría. 
-                      Por favor, haz el mejor análisis posible con la imagen que se te ha proporcionado.
-                      Tienes que hablarle a la persona directamente usando la segunda persona (ej. "tú, tu").
-                      Analiza la imagen e identifica el color de tu piel, ojos y cabello. Luego, basándote en estas características, determina tu estación de color y tu forma de cuerpo.
-                      Con base en esta información, te daré recomendaciones que incluyan descripciones detalladas de prendas, pensando en que estas descripciones podrían usarse para generar una imagen de la prenda.
+            // Prompt actualizado para un análisis más dinámico y preciso
+            const prompt = `Actúa como un estilista personal y experto en colorimetría. 
+                            Analiza la imagen e identifica el color de la piel, ojos y cabello de la persona. 
+                            Luego, basándote en estas características, determina su estación de color y su forma de cuerpo. 
+                            Tienes que hablarle a la persona directamente usando la segunda persona (ej. "tú, tu").
+                            
+                            Devuelve la respuesta en formato JSON con la siguiente estructura. El texto en "analisis_general" debe ser único y adaptado a la imagen proporcionada. Las demás propiedades deben ser arrays de objetos con los datos correspondientes.
 
-                      Devuelve la respuesta en formato JSON con la siguiente estructura:
-
-                      {
-                        "analisis_general": "Según tu tono de piel, el color de tus ojos y tu cabello, tu estación de color es Otoño. Tienes una piel clara con subtonos cálidos, ojos color avellana y cabello castaño claro con reflejos dorados. Tu forma de cuerpo es reloj de arena, con hombros y caderas proporcionadas y una cintura bien definida. Te recomiendo usar prendas que acentúen tu cintura y equilibren tus proporciones.",
-                        "entrevistas": [
-                          {"nombre": "Azul Marino", "hex": "#000080"},
-                          {"nombre": "Gris Carbón", "hex": "#36454F"},
-                          {"nombre": "Blanco Roto", "hex": "#F5F5DC"},
-                          {"nombre": "Verde Bosque", "hex": "#228B22"},
-                          {"nombre": "Borgoña", "hex": "#800020"}
-                        ],
-                        "dia_a_dia": [
-                          {"nombre": "Verde Oliva", "hex": "#6B8E23"},
-                          {"nombre": "Naranja Quemado", "hex": "#CC5500"},
-                          {"nombre": "Mostaza", "hex": "#FFDB58"},
-                          {"nombre": "Turquesa", "hex": "#40E0D0"},
-                          {"nombre": "Beige Cálido", "hex": "#F5F5DC"}
-                        ],
-                        "prendas_recomendadas": [
-                          {
-                            "descripcion": "Un blazer de corte recto en color Gris Carbón para estilizar tu figura.",
-                            "imagen_url": null 
-                          },
-                          {
-                            "descripcion": "Un vestido en un tono Azul Marino con cuello en V para alargar tu torso.",
-                            "imagen_url": null
-                          },
-                          {
-                            "descripcion": "Una blusa de seda en un tono Naranja Quemado combinada con pantalones de talle alto de color beige cálido para equilibrar tus proporciones.",
-                            "imagen_url": null
-                          }
-                        ]
-                      }`;
+                            {
+                              "analisis_general": "Basándome en tu imagen, pareces tener un tono de piel <tono de piel> con subtonos <subtonos>, ojos <color de ojos> y cabello <color de cabello>. Esto te ubica en la estación de color <estación de color>. Tu forma de cuerpo parece ser <forma de cuerpo>, con <descripción de la forma>. Te recomiendo usar prendas que <recomendación de prendas>",
+                              "entrevistas": [
+                                {"nombre": "Azul Marino", "hex": "#000080"},
+                                {"nombre": "Gris Carbón", "hex": "#36454F"},
+                                {"nombre": "Blanco Roto", "hex": "#F5F5DC"},
+                                {"nombre": "Verde Bosque", "hex": "#228B22"},
+                                {"nombre": "Borgoña", "hex": "#800020"}
+                              ],
+                              "dia_a_dia": [
+                                {"nombre": "Verde Oliva", "hex": "#6B8E23"},
+                                {"nombre": "Naranja Quemado", "hex": "#CC5500"},
+                                {"nombre": "Mostaza", "hex": "#FFDB58"},
+                                {"nombre": "Turquesa", "hex": "#40E0D0"},
+                                {"nombre": "Beige Cálido", "hex": "#F5F5DC"}
+                              ],
+                              "prendas_recomendadas": [
+                                {
+                                  "descripcion": "Un blazer de corte recto en color Gris Carbón para estilizar tu figura."
+                                },
+                                {
+                                  "descripcion": "Un vestido en un tono Azul Marino con cuello en V para alargar tu torso."
+                                },
+                                {
+                                  "descripcion": "Una blusa de seda en un tono Naranja Quemado combinada con pantalones de talle alto de color beige cálido para equilibrar tus proporciones."
+                                }
+                              ]
+                            }`;
 
             const result = await model.generateContent([
                 prompt,
@@ -375,8 +372,9 @@ function ImageUploader() {
             }
 
             try {
-                // Elimina las etiquetas de código y parsea el JSON
-                const jsonResponse = JSON.parse(textResponse.replace(/```json\n|\n```/g, ''));
+                // Elimina las etiquetas de código y caracteres de formato Markdown
+                const cleanTextResponse = textResponse.replace(/```json\n|\n```|```/g, '').replace(/\*\*(.*?)\*\*/g, '$1');
+                const jsonResponse = JSON.parse(cleanTextResponse);
                 setResponse(jsonResponse);
             } catch (parseError) {
                 console.error("Error al parsear la respuesta JSON:", parseError);
