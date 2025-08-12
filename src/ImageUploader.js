@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Chatbot from './Chatbot';
 
 // Usa la clave de API desde las variables de entorno
-const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
+const API_KEY = process.env.REACT_APP_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const styles = {
