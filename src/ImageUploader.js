@@ -1,10 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { analyzeImageWithOllama } from './services/ollamaService';
 import Chatbot from './Chatbot';
 
-// Usa la clave de API desde las variables de entorno
-const API_KEY = process.env.REACT_APP_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
 
 const styles = {
     container: {
@@ -435,11 +432,8 @@ const ImageUploader = () => {
 
         try {
             const base64Image = await getBase64(file);
-            const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-flash"
-            });
 
-            // Prompt actualizado para un análisis más dinámico y preciso
+            // Prompt for Ollama
             const prompt = `Actúa como un estilista personal y experto en colorimetría. 
                             Analiza la imagen e identifica el color de la piel, ojos y cabello de la persona. 
                             Luego, basándote en estas características, determina su estación de color y su forma de cuerpo. 
@@ -476,40 +470,15 @@ const ImageUploader = () => {
                               ]
                             }`;
 
-            const result = await model.generateContent([
-                prompt,
-                {
-                    inlineData: {
-                        mimeType: file.type,
-                        data: base64Image,
-                    },
-                },
-            ]);
+            const jsonResponse = await analyzeImageWithOllama(base64Image, prompt);
+            setResponse(jsonResponse);
 
-            const textResponse = result.response?.text();
-            
-            // Log de la respuesta cruda para depuración
-            console.log("Respuesta cruda de la IA:", textResponse); 
-
-            if (!textResponse) {
-                setError("No se recibió una respuesta de la IA.");
-                return;
+            // Extract colors from the response for the chatbot
+            if (jsonResponse.entrevistas && jsonResponse.dia_a_dia) {
+                const colors = [...jsonResponse.entrevistas, ...jsonResponse.dia_a_dia];
+                setRecommendedColors(colors);
             }
 
-            try {
-                // Elimina las etiquetas de código y caracteres de formato Markdown
-                const cleanTextResponse = textResponse.replace(/```json\n|\n```|```/g, '').replace(/\*\*(.*?)\*\*/g, '$1');
-                const jsonResponse = JSON.parse(cleanTextResponse);
-                setResponse(jsonResponse);
-        // Extract colors from the response for the chatbot
-        if (jsonResponse.paleta_colores) {
-            const colors = Object.values(jsonResponse.paleta_colores).flat();
-            setRecommendedColors(colors);
-        }
-            } catch (parseError) {
-                console.error("Error al parsear la respuesta JSON:", parseError);
-                setError("La IA no devolvió un formato JSON válido. Intenta con otra imagen o revisa el prompt.");
-            }
 
         } catch (err) {
             console.error("Error general en analyzeImage:", err);

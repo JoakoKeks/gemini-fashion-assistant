@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getOllamaChatResponse } from './services/ollamaService';
 
-const API_KEY = "AIzaSyApwkRPpjCzIqnzZXBmXqDD86AtWsDjiKE";
-const genAI = new GoogleGenerativeAI(API_KEY);
 
 const Chatbot = ({ colors, onClose }) => {
   const [messages, setMessages] = useState([
@@ -39,18 +37,7 @@ const Chatbot = ({ colors, onClose }) => {
     setIsLoading(true);
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      
-      // Create a prompt that includes the color information
-      const colorInfo = colors ? `Los colores recomendados son: ${colors.join(', ')}. ` : '';
-      
-      const prompt = `Eres un asistente de moda y estilo. ${colorInfo}El usuario pregunta: "${input}"\n\n` +
-        `Responde de manera amigable y profesional en español. Incluye recomendaciones específicas de prendas, estilos o combinaciones que funcionen con los colores mencionados. ` +
-        `Si el usuario no ha especificado un tipo de prenda, sugiere algunas opciones. Mantén las respuestas concisas y útiles.`;
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      const text = await getOllamaChatResponse(input, colors);
 
       setMessages(prev => [...prev, {
         text: text,
