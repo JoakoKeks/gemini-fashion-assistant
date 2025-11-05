@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Chatbot from './Chatbot';
+import ColorModal from './components/ColorModal';
 import { analyzeImage as analyzeImageService } from './services/geminiService';
 
 const styles = {
@@ -11,7 +12,7 @@ const styles = {
         width: '100%',
         margin: '0',
         minHeight: '100vh',
-        backgroundColor: '#f8f9ff',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         color: '#2d3748',
         paddingBottom: '80px',
     },
@@ -22,10 +23,11 @@ const styles = {
         letterSpacing: '-1px',
         display: 'inline-block',
         lineHeight: '1.1',
-        color: '#1a1a1a',
+        color: '#ffffff',
+        textShadow: '0 2px 10px rgba(0,0,0,0.2)',
     },
     iaText: {
-        background: 'linear-gradient(45deg, #7c3aed, #c026d3)',
+        background: 'linear-gradient(45deg, #ffd700, #ff6b6b)',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
         display: 'inline-block',
@@ -33,14 +35,15 @@ const styles = {
         marginLeft: '4px',
     },
     subtitle: {
-        color: '#4a5568',
+        color: '#ffffff',
         fontSize: '0.9rem',
         maxWidth: '100%',
         margin: '0.5rem 1rem 1.5rem',
         lineHeight: '1.5',
         fontWeight: '400',
-        opacity: 0.9,
+        opacity: 0.95,
         padding: '0 0.5rem',
+        textShadow: '0 1px 3px rgba(0,0,0,0.2)',
     },
     uploadArea: {
         display: 'flex',
@@ -68,15 +71,15 @@ const styles = {
     },
     button: {
         padding: '0.875rem 2rem',
-        backgroundColor: '#4f46e5',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         color: 'white',
         border: 'none',
-        borderRadius: '12px',
+        borderRadius: '25px',
         cursor: 'pointer',
         fontSize: '1rem',
         fontWeight: '600',
         transition: 'all 0.3s ease',
-        boxShadow: '0 4px 14px rgba(79, 70, 229, 0.3)',
+        boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)',
         width: '100%',
         maxWidth: '300px',
     },
@@ -137,12 +140,13 @@ const styles = {
     colorPaletteSection: {
         marginTop: '1.5rem',
         padding: '1rem 0',
-        backgroundColor: '#f8fafc',
-        borderRadius: '8px',
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)',
+        borderRadius: '12px',
         marginBottom: '1.5rem',
-        border: '1px solid #e2e8f0',
+        border: 'none',
         width: '100%',
         boxSizing: 'border-box',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
     },
     chatButton: {
         position: 'fixed',
@@ -151,10 +155,10 @@ const styles = {
         width: '56px',
         height: '56px',
         borderRadius: '50%',
-        backgroundColor: '#7c3aed',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         color: 'white',
         border: 'none',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+        boxShadow: '0 6px 20px rgba(102, 126, 234, 0.5)',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
@@ -191,6 +195,8 @@ const styles = {
         overflow: 'hidden',
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
         margin: 0,
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
     },
     colorSwatch: {
         height: '90px',
@@ -263,7 +269,7 @@ const styles = {
         borderRadius: '50%'
     },
     recommendationsContainer: {
-        marginTop: '1.5rem',
+        marginTop: '3rem',
     },
     recommendationTitle: {
         fontSize: '1.1rem',
@@ -274,15 +280,79 @@ const styles = {
     recommendationItem: {
         backgroundColor: 'white',
         padding: '1rem',
-        borderRadius: '8px',
-        marginBottom: '0.75rem',
-        borderLeft: '3px solid #4f46e5',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+        borderRadius: '12px',
+        marginBottom: '1rem',
+        borderLeft: '4px solid #667eea',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
         fontSize: '0.9rem',
         lineHeight: '1.5',
     },
+    recommendationHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '0.5rem',
+    },
+    prendaName: {
+        fontSize: '1rem',
+        fontWeight: '700',
+        color: '#1a1a1a',
+    },
+    tiendaBadge: {
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        padding: '0.25rem 0.75rem',
+        borderRadius: '12px',
+        fontSize: '0.75rem',
+        fontWeight: '600',
+    },
+    colorTag: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        backgroundColor: '#f3f4f6',
+        padding: '0.25rem 0.75rem',
+        borderRadius: '12px',
+        fontSize: '0.8rem',
+        fontWeight: '500',
+        color: '#4b5563',
+        marginBottom: '0.5rem',
+    },
+    colorDot: {
+        width: '12px',
+        height: '12px',
+        borderRadius: '50%',
+        border: '2px solid white',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+    },
     recommendationText: {
-        flexGrow: 1,
+        color: '#4b5563',
+        marginBottom: '0.75rem',
+        lineHeight: '1.6',
+    },
+    precioContainer: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingTop: '0.5rem',
+        borderTop: '1px solid #e5e7eb',
+    },
+    precioLabel: {
+        fontSize: '0.8rem',
+        color: '#6b7280',
+    },
+    precio: {
+        fontSize: '1rem',
+        fontWeight: '700',
+        color: '#667eea',
+    },
+    clickHint: {
+        fontSize: '0.65rem',
+        color: '#667eea',
+        textAlign: 'center',
+        padding: '0.25rem',
+        backgroundColor: '#f0f4ff',
+        fontWeight: '500',
     },
 };
 
@@ -294,6 +364,7 @@ const ImageUploader = () => {
     const [imagePreview, setImagePreview] = useState(null);
     const [response, setResponse] = useState(null);
     const [error, setError] = useState('');
+    const [selectedColor, setSelectedColor] = useState(null);
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files?.[0];
@@ -335,7 +406,12 @@ const ImageUploader = () => {
     const renderColors = (colors) => (
         <div style={styles.colorPalette}>
             {colors.map((color, index) => (
-                <div key={index} className="color-card" style={styles.colorCard}>
+                <div 
+                    key={index} 
+                    className="color-card" 
+                    style={styles.colorCard}
+                    onClick={() => setSelectedColor(color)}
+                >
                     <div
                         className="color-swatch"
                         style={{
@@ -352,18 +428,39 @@ const ImageUploader = () => {
                         <p style={styles.colorName}>{color.nombre}</p>
                         <p style={styles.colorCode}>{color.hex}</p>
                     </div>
+                    <div style={styles.clickHint}>👆 Click para ver prendas</div>
                 </div>
             ))}
         </div>
     );
     
-    // Función renderRecommendationsWithImages modificada para no mostrar imágenes
     const renderRecommendationsWithImages = (prendas) => (
       <div style={styles.recommendationsContainer}>
-          <h4 style={styles.recommendationTitle}>Recomendaciones de Prendas</h4>
+          <h4 style={styles.recommendationTitle}>🛍️ Recomendaciones de Prendas</h4>
           {prendas.map((prenda, index) => (
               <div key={index} style={styles.recommendationItem}>
+                  <div style={styles.recommendationHeader}>
+                      <span style={styles.prendaName}>{prenda.prenda || 'Prenda'}</span>
+                      {prenda.tienda && (
+                          <span style={styles.tiendaBadge}>{prenda.tienda}</span>
+                      )}
+                  </div>
+                  {prenda.color && (
+                      <div style={styles.colorTag}>
+                          <span style={{
+                              ...styles.colorDot,
+                              backgroundColor: prenda.color_hex || '#667eea'
+                          }}></span>
+                          {prenda.color}
+                      </div>
+                  )}
                   <p style={styles.recommendationText}>{prenda.descripcion}</p>
+                  {prenda.precio_aprox && (
+                      <div style={styles.precioContainer}>
+                          <span style={styles.precioLabel}>Precio aprox:</span>
+                          <span style={styles.precio}>{prenda.precio_aprox}</span>
+                      </div>
+                  )}
               </div>
           ))}
       </div>
@@ -394,20 +491,20 @@ const ImageUploader = () => {
                     disabled={loading}
                     style={{ ...styles.button, ...(loading && styles.buttonDisabled) }}
                 >
-                    {loading ? 'Analizando...' : 'Analizar Imagen'}
+                    {loading ? '✨ Analizando...' : '✨ Analizar Imagen'}
                 </button>
             </div>
 
             {loading && (
                 <div style={styles.loading}>
                     <div className="spinner" style={styles.spinner}></div>
-                    <p>Analizando tu imagen...</p>
+                    <p style={{color: 'white', fontWeight: '500'}}>✨ Analizando tu estilo...</p>
                 </div>
             )}
 
             {imagePreview && !loading && (
                 <div style={styles.previewContainer}>
-                    <h3 style={styles.previewTitle}>Vista Previa de la Imagen:</h3>
+                    <h3 style={styles.previewTitle}>📸 Vista Previa</h3>
                     <img src={imagePreview} alt="Vista previa del atuendo" style={styles.imagePreview} />
                 </div>
             )}
@@ -416,14 +513,14 @@ const ImageUploader = () => {
 
             {response && (
                 <div style={styles.responseContainer}>
-                    <h3 style={styles.responseTitle}>Resultados del Análisis:</h3>
+                    <h3 style={styles.responseTitle}>✨ Tu Análisis Personalizado</h3>
                     <p>{response.analisis_general}</p>
                     <div style={styles.colorPaletteSection}>
-                        <h4 style={styles.colorPaletteTitle}>Colores para Entrevistas de Trabajo</h4>
+                        <h4 style={styles.colorPaletteTitle}>💼 Colores para Entrevistas</h4>
                         {renderColors(response.entrevistas)}
                     </div>
                     <div style={styles.colorPaletteSection}>
-                        <h4 style={styles.colorPaletteTitle}>Colores para el Día a Día</h4>
+                        <h4 style={styles.colorPaletteTitle}>☀️ Colores para el Día a Día</h4>
                         {renderColors(response.dia_a_dia)}
                     </div>
                     {response.prendas_recomendadas && renderRecommendationsWithImages(response.prendas_recomendadas)}
@@ -444,6 +541,14 @@ const ImageUploader = () => {
                 <Chatbot 
                     colors={recommendedColors} 
                     onClose={() => setShowChatbot(false)} 
+                />
+            )}
+
+            {/* Color Modal */}
+            {selectedColor && (
+                <ColorModal 
+                    color={selectedColor}
+                    onClose={() => setSelectedColor(null)}
                 />
             )}
         </div>

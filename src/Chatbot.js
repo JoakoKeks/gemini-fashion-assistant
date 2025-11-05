@@ -143,13 +143,13 @@ const styles = {
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   chatbotHeader: {
-    backgroundColor: '#7c3aed',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     color: 'white',
     padding: '1rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
   },
   chatbotTitle: {
     display: 'flex',
@@ -203,7 +203,7 @@ const styles = {
     borderTopLeftRadius: '4px',
   },
   userMessage: {
-    backgroundColor: '#7c3aed',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     color: 'white',
     alignSelf: 'flex-end',
     borderTopRightRadius: '4px',
@@ -248,7 +248,7 @@ const styles = {
   },
   sendButton: {
     padding: '0.75rem 1.5rem',
-    backgroundColor: '#7c3aed',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     color: 'white',
     border: 'none',
     borderRadius: '20px',
@@ -256,6 +256,7 @@ const styles = {
     fontWeight: 600,
     fontSize: '0.9rem',
     whiteSpace: 'nowrap',
+    boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)',
   },
 };
 

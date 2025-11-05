@@ -45,6 +45,18 @@ h1, h2, h3, h4, h5, h6 {
   100% { transform: rotate(360deg); }
 }
 
+/* Animación del modal */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .spinner {
   animation: spin 1s linear infinite;
 }
@@ -81,6 +93,16 @@ html {
 /* Ocultar scrollbar pero mantener funcionalidad */
 .color-palette::-webkit-scrollbar {
   display: none;
+}
+
+/* Efecto hover en tarjetas de color */
+.color-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+.color-card:active {
+  transform: translateY(-2px);
 }
 
 /* Estilos móviles */
