@@ -3,6 +3,218 @@ import Chatbot from './Chatbot';
 import ColorModal from './components/ColorModal';
 import { analyzeImage as analyzeImageService } from './services/geminiService';
 
+const ImageUploader = () => {
+    const [showChatbot, setShowChatbot] = useState(false);
+    const [recommendedColors, setRecommendedColors] = useState([]);
+    const [file, setFile] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [response, setResponse] = useState(null);
+    const [error, setError] = useState('');
+    const [selectedColor, setSelectedColor] = useState(null);
+
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files?.[0];
+        setFile(selectedFile);
+        if (selectedFile) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(selectedFile);
+            setError('');
+        } else {
+            setImagePreview(null);
+        }
+    };
+
+    const handleAnalyzeImage = async () => {
+        if (!file) {
+            setError("Por favor, sube una imagen primero.");
+            return;
+        }
+
+        setLoading(true);
+        setResponse(null);
+        setError('');
+
+        try {
+            const result = await analyzeImageService(file);
+            setResponse(result.analysis);
+            setRecommendedColors(result.colors);
+        } catch (err) {
+            setError(`Ocurrió un error al analizar la imagen: ${err.message}`);
+            setResponse(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const renderColors = (colors) => (
+        <div style={styles.colorPalette}>
+            {colors.map((color, index) => (
+                <div 
+                    key={index} 
+                    className="color-card" 
+                    style={styles.colorCard}
+                    onClick={() => setSelectedColor(color)}
+                >
+                    <div
+                        className="color-swatch"
+                        style={{
+                            ...styles.colorSwatch,
+                            backgroundColor: color.hex,
+                            background: `linear-gradient(135deg, ${color.hex} 0%, ${color.hex} 50%, ${color.hex}99 100%)`
+                        }}
+                    >
+                        <div style={styles.colorOverlay}>
+                            <span style={styles.colorHex}>{color.hex}</span>
+                        </div>
+                    </div>
+                    <div style={styles.colorInfo}>
+                        <p style={styles.colorName}>{color.nombre}</p>
+                        <p style={styles.colorCode}>{color.hex}</p>
+                    </div>
+                    <div style={styles.clickHint}>Click para ver prendas</div>
+                </div>
+            ))}
+        </div>
+    );
+    
+    const renderRecommendationsWithImages = (prendas) => (
+      <div style={styles.recommendationsContainer}>
+          <h4 style={styles.recommendationTitle}>Recomendaciones de Prendas</h4>
+          {prendas.map((prenda, index) => (
+              <div key={index} style={styles.recommendationItem}>
+                  <div style={styles.recommendationHeader}>
+                      <span style={styles.prendaName}>{prenda.prenda || 'Prenda'}</span>
+                      {prenda.tienda && (
+                          <span style={styles.tiendaBadge}>{prenda.tienda}</span>
+                      )}
+                  </div>
+                  {prenda.color && (
+                      <div style={styles.colorTag}>
+                          <span style={{
+                              ...styles.colorDot,
+                              backgroundColor: prenda.color_hex || '#667eea'
+                          }}></span>
+                          {prenda.color}
+                      </div>
+                  )}
+                  <p style={styles.recommendationText}>{prenda.descripcion}</p>
+                  <div style={styles.bottomRow}>
+                      {prenda.precio_aprox && (
+                          <div style={styles.precioContainer}>
+                              <span style={styles.precioLabel}>Precio aprox:</span>
+                              <span style={styles.precio}>{prenda.precio_aprox}</span>
+                          </div>
+                      )}
+                      {prenda.url && (
+                          <a 
+                              href={prenda.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={styles.shopButton}
+                              className="shop-button"
+                          >
+                              Ver en tienda
+                          </a>
+                      )}
+                  </div>
+              </div>
+          ))}
+      </div>
+    );
+
+    return (
+        <div style={styles.container}>
+            <h1 style={styles.title}>
+                <span style={{ color: '#1a1a1a', fontWeight: 800 }}>Esenc</span>
+                <span style={{ 
+                    background: 'linear-gradient(45deg, #7c3aed, #c026d3)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    display: 'inline-block',
+                    fontWeight: 800,
+                    marginLeft: '4px',
+                    textTransform: 'uppercase'
+                }}>ia</span>
+            </h1>
+            <p style={styles.subtitle}>
+                Descubre tu paleta de colores personalizada con inteligencia artificial.
+                Sube una foto y recibe un análisis detallado de colores y recomendaciones de prendas.
+            </p>
+            <div style={styles.uploadArea}>
+                <input type="file" onChange={handleFileChange} accept="image/*" style={styles.fileInput} />
+                <button
+                    onClick={handleAnalyzeImage}
+                    disabled={loading}
+                    style={{ ...styles.button, ...(loading && styles.buttonDisabled) }}
+                >
+                    {loading ? 'Analizando...' : 'Analizar Imagen'}
+                </button>
+            </div>
+
+            {loading && (
+                <div style={styles.loading}>
+                    <div className="spinner" style={styles.spinner}></div>
+                    <p style={{color: 'white', fontWeight: '500'}}>Analizando tu estilo...</p>
+                </div>
+            )}
+
+            {imagePreview && !loading && (
+                <div style={styles.previewContainer}>
+                    <h3 style={styles.previewTitle}>Vista Previa</h3>
+                    <img src={imagePreview} alt="Vista previa del atuendo" style={styles.imagePreview} />
+                </div>
+            )}
+
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
+            {response && (
+                <div style={styles.responseContainer}>
+                    <h3 style={styles.responseTitle}>Tu Análisis Personalizado</h3>
+                    <p>{response.analisis_general}</p>
+                    <div style={styles.colorPaletteSection}>
+                        <h4 style={styles.colorPaletteTitle}>Colores para Entrevistas</h4>
+                        {renderColors(response.entrevistas)}
+                    </div>
+                    <div style={styles.colorPaletteSection}>
+                        <h4 style={styles.colorPaletteTitle}>Colores para el Día a Día</h4>
+                        {renderColors(response.dia_a_dia)}
+                    </div>
+                    {response.prendas_recomendadas && renderRecommendationsWithImages(response.prendas_recomendadas)}
+                </div>
+            )}
+            
+            {/* Chatbot Toggle Button */}
+            <button 
+                onClick={() => setShowChatbot(!showChatbot)}
+                style={styles.chatButton}
+                aria-label="Abrir chat de asesoría de estilo"
+            >
+                Chat
+            </button>
+            
+            {/* Chatbot Component */}
+            {showChatbot && (
+                <Chatbot 
+                    colors={recommendedColors} 
+                    onClose={() => setShowChatbot(false)} 
+                />
+            )}
+
+            {/* Color Modal */}
+            {selectedColor && (
+                <ColorModal 
+                    color={selectedColor}
+                    onClose={() => setSelectedColor(null)}
+                />
+            )}
+        </div>
+    );
+}
+
 const styles = {
     container: {
         padding: '1rem',
@@ -371,217 +583,5 @@ const styles = {
         fontWeight: '500',
     },
 };
-
-const ImageUploader = () => {
-    const [showChatbot, setShowChatbot] = useState(false);
-    const [recommendedColors, setRecommendedColors] = useState([]);
-    const [file, setFile] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [imagePreview, setImagePreview] = useState(null);
-    const [response, setResponse] = useState(null);
-    const [error, setError] = useState('');
-    const [selectedColor, setSelectedColor] = useState(null);
-
-    const handleFileChange = (e) => {
-        const selectedFile = e.target.files?.[0];
-        setFile(selectedFile);
-        if (selectedFile) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
-            };
-            reader.readAsDataURL(selectedFile);
-            setError('');
-        } else {
-            setImagePreview(null);
-        }
-    };
-
-    const handleAnalyzeImage = async () => {
-        if (!file) {
-            setError("Por favor, sube una imagen primero.");
-            return;
-        }
-
-        setLoading(true);
-        setResponse(null);
-        setError('');
-
-        try {
-            const result = await analyzeImageService(file);
-            setResponse(result.analysis);
-            setRecommendedColors(result.colors);
-        } catch (err) {
-            setError(`Ocurrió un error al analizar la imagen: ${err.message}`);
-            setResponse(null);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const renderColors = (colors) => (
-        <div style={styles.colorPalette}>
-            {colors.map((color, index) => (
-                <div 
-                    key={index} 
-                    className="color-card" 
-                    style={styles.colorCard}
-                    onClick={() => setSelectedColor(color)}
-                >
-                    <div
-                        className="color-swatch"
-                        style={{
-                            ...styles.colorSwatch,
-                            backgroundColor: color.hex,
-                            background: `linear-gradient(135deg, ${color.hex} 0%, ${color.hex} 50%, ${color.hex}99 100%)`
-                        }}
-                    >
-                        <div style={styles.colorOverlay}>
-                            <span style={styles.colorHex}>{color.hex}</span>
-                        </div>
-                    </div>
-                    <div style={styles.colorInfo}>
-                        <p style={styles.colorName}>{color.nombre}</p>
-                        <p style={styles.colorCode}>{color.hex}</p>
-                    </div>
-                    <div style={styles.clickHint}>Click para ver prendas</div>
-                </div>
-            ))}
-        </div>
-    );
-    
-    const renderRecommendationsWithImages = (prendas) => (
-      <div style={styles.recommendationsContainer}>
-          <h4 style={styles.recommendationTitle}>Recomendaciones de Prendas</h4>
-          {prendas.map((prenda, index) => (
-              <div key={index} style={styles.recommendationItem}>
-                  <div style={styles.recommendationHeader}>
-                      <span style={styles.prendaName}>{prenda.prenda || 'Prenda'}</span>
-                      {prenda.tienda && (
-                          <span style={styles.tiendaBadge}>{prenda.tienda}</span>
-                      )}
-                  </div>
-                  {prenda.color && (
-                      <div style={styles.colorTag}>
-                          <span style={{
-                              ...styles.colorDot,
-                              backgroundColor: prenda.color_hex || '#667eea'
-                          }}></span>
-                          {prenda.color}
-                      </div>
-                  )}
-                  <p style={styles.recommendationText}>{prenda.descripcion}</p>
-                  <div style={styles.bottomRow}>
-                      {prenda.precio_aprox && (
-                          <div style={styles.precioContainer}>
-                              <span style={styles.precioLabel}>Precio aprox:</span>
-                              <span style={styles.precio}>{prenda.precio_aprox}</span>
-                          </div>
-                      )}
-                      {prenda.url && (
-                          <a 
-                              href={prenda.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              style={styles.shopButton}
-                              className="shop-button"
-                          >
-                              Ver en tienda
-                          </a>
-                      )}
-                  </div>
-              </div>
-          ))}
-      </div>
-    );
-
-    return (
-        <div style={styles.container}>
-            <h1 style={styles.title}>
-                <span style={{ color: '#1a1a1a', fontWeight: 800 }}>Esenc</span>
-                <span style={{ 
-                    background: 'linear-gradient(45deg, #7c3aed, #c026d3)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    display: 'inline-block',
-                    fontWeight: 800,
-                    marginLeft: '4px',
-                    textTransform: 'uppercase'
-                }}>ia</span>
-            </h1>
-            <p style={styles.subtitle}>
-                Descubre tu paleta de colores personalizada con inteligencia artificial.
-                Sube una foto y recibe un análisis detallado de colores y recomendaciones de prendas.
-            </p>
-            <div style={styles.uploadArea}>
-                <input type="file" onChange={handleFileChange} accept="image/*" style={styles.fileInput} />
-                <button
-                    onClick={handleAnalyzeImage}
-                    disabled={loading}
-                    style={{ ...styles.button, ...(loading && styles.buttonDisabled) }}
-                >
-                    {loading ? 'Analizando...' : 'Analizar Imagen'}
-                </button>
-            </div>
-
-            {loading && (
-                <div style={styles.loading}>
-                    <div className="spinner" style={styles.spinner}></div>
-                    <p style={{color: 'white', fontWeight: '500'}}>Analizando tu estilo...</p>
-                </div>
-            )}
-
-            {imagePreview && !loading && (
-                <div style={styles.previewContainer}>
-                    <h3 style={styles.previewTitle}>Vista Previa</h3>
-                    <img src={imagePreview} alt="Vista previa del atuendo" style={styles.imagePreview} />
-                </div>
-            )}
-
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-
-            {response && (
-                <div style={styles.responseContainer}>
-                    <h3 style={styles.responseTitle}>Tu Análisis Personalizado</h3>
-                    <p>{response.analisis_general}</p>
-                    <div style={styles.colorPaletteSection}>
-                        <h4 style={styles.colorPaletteTitle}>Colores para Entrevistas</h4>
-                        {renderColors(response.entrevistas)}
-                    </div>
-                    <div style={styles.colorPaletteSection}>
-                        <h4 style={styles.colorPaletteTitle}>Colores para el Día a Día</h4>
-                        {renderColors(response.dia_a_dia)}
-                    </div>
-                    {response.prendas_recomendadas && renderRecommendationsWithImages(response.prendas_recomendadas)}
-                </div>
-            )}
-            
-            {/* Chatbot Toggle Button */}
-            <button 
-                onClick={() => setShowChatbot(!showChatbot)}
-                style={styles.chatButton}
-                aria-label="Abrir chat de asesoría de estilo"
-            >
-                Chat
-            </button>
-            
-            {/* Chatbot Component */}
-            {showChatbot && (
-                <Chatbot 
-                    colors={recommendedColors} 
-                    onClose={() => setShowChatbot(false)} 
-                />
-            )}
-
-            {/* Color Modal */}
-            {selectedColor && (
-                <ColorModal 
-                    color={selectedColor}
-                    onClose={() => setSelectedColor(null)}
-                />
-            )}
-        </div>
-    );
-}
 
 export default ImageUploader;
