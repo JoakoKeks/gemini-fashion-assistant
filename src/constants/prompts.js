@@ -11,7 +11,9 @@ Para las recomendaciones de prendas, incluye tiendas reales populares en Chile c
 
 Para cada color en las paletas, incluye 2 recomendaciones de prendas específicas que se vean bien en ese color.
 
-IMPORTANTE: En las prendas_recomendadas, SIEMPRE incluye el campo "color_hex" con el código hexadecimal exacto del color mencionado.
+IMPORTANTE: En las prendas_recomendadas, SIEMPRE incluye:
+- "color_hex": código hexadecimal exacto del color
+- "url": enlace a la página principal de la tienda (ej: https://www.falabella.com, https://www.ripley.cl, https://www.paris.cl, https://www.zara.com/cl, https://cl.hm.com, https://shop.mango.com/cl)
 
 Devuelve ÚNICAMENTE un objeto JSON válido (sin texto adicional, sin markdown, sin explicaciones) con la siguiente estructura exacta:
 
@@ -108,7 +110,8 @@ Devuelve ÚNICAMENTE un objeto JSON válido (sin texto adicional, sin markdown, 
       "color_hex": "#36454F",
       "descripcion": "Perfecto para estilizar tu figura y crear una silueta elegante",
       "tienda": "Falabella",
-      "precio_aprox": "$45.990"
+      "precio_aprox": "$45.990",
+      "url": "https://www.falabella.com"
     },
     {
       "prenda": "Vestido con cuello en V",
@@ -116,7 +119,8 @@ Devuelve ÚNICAMENTE un objeto JSON válido (sin texto adicional, sin markdown, 
       "color_hex": "#000080",
       "descripcion": "El cuello en V alarga tu torso y crea una línea visual favorecedora",
       "tienda": "Ripley",
-      "precio_aprox": "$29.990"
+      "precio_aprox": "$29.990",
+      "url": "https://www.ripley.cl"
     },
     {
       "prenda": "Blusa de seda",
@@ -124,7 +128,8 @@ Devuelve ÚNICAMENTE un objeto JSON válido (sin texto adicional, sin markdown, 
       "color_hex": "#CC5500",
       "descripcion": "Combínala con pantalones de talle alto para equilibrar proporciones",
       "tienda": "Paris",
-      "precio_aprox": "$34.990"
+      "precio_aprox": "$34.990",
+      "url": "https://www.paris.cl"
     }
   ]
 }`;

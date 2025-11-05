@@ -105,6 +105,13 @@ html {
   transform: translateY(-2px);
 }
 
+/* Efecto hover en botón de tienda */
+a[style*="shopButton"]:hover,
+.shop-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5) !important;
+}
+
 /* Estilos móviles */
 @media (max-width: 768px) {
   body {

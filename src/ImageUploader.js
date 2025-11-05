@@ -327,21 +327,40 @@ const styles = {
         marginBottom: '0.75rem',
         lineHeight: '1.6',
     },
-    precioContainer: {
+    bottomRow: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingTop: '0.5rem',
+        paddingTop: '0.75rem',
         borderTop: '1px solid #e5e7eb',
+        gap: '1rem',
+        flexWrap: 'wrap',
+    },
+    precioContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.25rem',
     },
     precioLabel: {
-        fontSize: '0.8rem',
-        color: '#6b7280',
+        fontSize: '0.75rem',
+        color: '#9ca3af',
     },
     precio: {
         fontSize: '1rem',
         fontWeight: '700',
         color: '#667eea',
+    },
+    shopButton: {
+        padding: '0.5rem 1rem',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        textDecoration: 'none',
+        borderRadius: '8px',
+        fontSize: '0.85rem',
+        fontWeight: '600',
+        transition: 'all 0.2s ease',
+        boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)',
+        whiteSpace: 'nowrap',
     },
     clickHint: {
         fontSize: '0.65rem',
@@ -452,12 +471,25 @@ const ImageUploader = () => {
                       </div>
                   )}
                   <p style={styles.recommendationText}>{prenda.descripcion}</p>
-                  {prenda.precio_aprox && (
-                      <div style={styles.precioContainer}>
-                          <span style={styles.precioLabel}>Precio aprox:</span>
-                          <span style={styles.precio}>{prenda.precio_aprox}</span>
-                      </div>
-                  )}
+                  <div style={styles.bottomRow}>
+                      {prenda.precio_aprox && (
+                          <div style={styles.precioContainer}>
+                              <span style={styles.precioLabel}>Precio aprox:</span>
+                              <span style={styles.precio}>{prenda.precio_aprox}</span>
+                          </div>
+                      )}
+                      {prenda.url && (
+                          <a 
+                              href={prenda.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={styles.shopButton}
+                              className="shop-button"
+                          >
+                              Ver en tienda
+                          </a>
+                      )}
+                  </div>
               </div>
           ))}
       </div>
