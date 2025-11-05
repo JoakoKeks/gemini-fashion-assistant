@@ -152,18 +152,15 @@ const styles = {
         position: 'fixed',
         bottom: '1rem',
         right: '1rem',
-        width: '56px',
-        height: '56px',
-        borderRadius: '50%',
+        padding: '0.75rem 1.5rem',
+        borderRadius: '25px',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         color: 'white',
         border: 'none',
         boxShadow: '0 6px 20px rgba(102, 126, 234, 0.5)',
         cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '1.5rem',
+        fontSize: '0.9rem',
+        fontWeight: '600',
         zIndex: 999,
     },
     colorPaletteTitle: {
@@ -428,7 +425,7 @@ const ImageUploader = () => {
                         <p style={styles.colorName}>{color.nombre}</p>
                         <p style={styles.colorCode}>{color.hex}</p>
                     </div>
-                    <div style={styles.clickHint}>👆 Click para ver prendas</div>
+                    <div style={styles.clickHint}>Click para ver prendas</div>
                 </div>
             ))}
         </div>
@@ -436,7 +433,7 @@ const ImageUploader = () => {
     
     const renderRecommendationsWithImages = (prendas) => (
       <div style={styles.recommendationsContainer}>
-          <h4 style={styles.recommendationTitle}>🛍️ Recomendaciones de Prendas</h4>
+          <h4 style={styles.recommendationTitle}>Recomendaciones de Prendas</h4>
           {prendas.map((prenda, index) => (
               <div key={index} style={styles.recommendationItem}>
                   <div style={styles.recommendationHeader}>
@@ -491,20 +488,20 @@ const ImageUploader = () => {
                     disabled={loading}
                     style={{ ...styles.button, ...(loading && styles.buttonDisabled) }}
                 >
-                    {loading ? '✨ Analizando...' : '✨ Analizar Imagen'}
+                    {loading ? 'Analizando...' : 'Analizar Imagen'}
                 </button>
             </div>
 
             {loading && (
                 <div style={styles.loading}>
                     <div className="spinner" style={styles.spinner}></div>
-                    <p style={{color: 'white', fontWeight: '500'}}>✨ Analizando tu estilo...</p>
+                    <p style={{color: 'white', fontWeight: '500'}}>Analizando tu estilo...</p>
                 </div>
             )}
 
             {imagePreview && !loading && (
                 <div style={styles.previewContainer}>
-                    <h3 style={styles.previewTitle}>📸 Vista Previa</h3>
+                    <h3 style={styles.previewTitle}>Vista Previa</h3>
                     <img src={imagePreview} alt="Vista previa del atuendo" style={styles.imagePreview} />
                 </div>
             )}
@@ -513,14 +510,14 @@ const ImageUploader = () => {
 
             {response && (
                 <div style={styles.responseContainer}>
-                    <h3 style={styles.responseTitle}>✨ Tu Análisis Personalizado</h3>
+                    <h3 style={styles.responseTitle}>Tu Análisis Personalizado</h3>
                     <p>{response.analisis_general}</p>
                     <div style={styles.colorPaletteSection}>
-                        <h4 style={styles.colorPaletteTitle}>💼 Colores para Entrevistas</h4>
+                        <h4 style={styles.colorPaletteTitle}>Colores para Entrevistas</h4>
                         {renderColors(response.entrevistas)}
                     </div>
                     <div style={styles.colorPaletteSection}>
-                        <h4 style={styles.colorPaletteTitle}>☀️ Colores para el Día a Día</h4>
+                        <h4 style={styles.colorPaletteTitle}>Colores para el Día a Día</h4>
                         {renderColors(response.dia_a_dia)}
                     </div>
                     {response.prendas_recomendadas && renderRecommendationsWithImages(response.prendas_recomendadas)}
@@ -533,7 +530,7 @@ const ImageUploader = () => {
                 style={styles.chatButton}
                 aria-label="Abrir chat de asesoría de estilo"
             >
-                💬
+                Chat
             </button>
             
             {/* Chatbot Component */}

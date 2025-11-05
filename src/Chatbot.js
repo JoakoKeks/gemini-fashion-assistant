@@ -66,7 +66,6 @@ const Chatbot = ({ colors, onClose }) => {
     <div style={styles.chatbotContainer}>
       <div style={styles.chatbotHeader}>
         <div style={styles.chatbotTitle}>
-          <span style={styles.chatbotIcon}>💬</span>
           <h3>Asistente de Estilo</h3>
         </div>
         <button onClick={onClose} style={styles.closeButton}>×</button>
@@ -152,15 +151,9 @@ const styles = {
     boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
   },
   chatbotTitle: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
     margin: 0,
     fontSize: '1rem',
     fontWeight: 600,
-  },
-  chatbotIcon: {
-    fontSize: '1.1rem',
   },
   closeButton: {
     background: 'none',

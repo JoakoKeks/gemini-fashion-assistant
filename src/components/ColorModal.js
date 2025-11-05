@@ -21,23 +21,11 @@ const ColorModal = ({ color, onClose }) => {
         </div>
 
         <div style={styles.content}>
-          <h3 style={styles.sectionTitle}>👔 Prendas Recomendadas</h3>
+          <h3 style={styles.sectionTitle}>Prendas Recomendadas</h3>
           {color.prendas && color.prendas.length > 0 ? (
             <div style={styles.prendasList}>
               {color.prendas.map((prenda, index) => (
                 <div key={index} style={styles.prendaCard}>
-                  <div style={styles.prendaIcon}>
-                    {prenda.tipo === 'Camisa' && '👔'}
-                    {prenda.tipo === 'Blazer' && '🧥'}
-                    {prenda.tipo === 'Pantalón' && '👖'}
-                    {prenda.tipo === 'Suéter' && '🧶'}
-                    {prenda.tipo === 'Camiseta' && '👕'}
-                    {prenda.tipo === 'Chaqueta' && '🧥'}
-                    {prenda.tipo === 'Blusa' && '👚'}
-                    {prenda.tipo === 'Cardigan' && '🧥'}
-                    {prenda.tipo === 'Vestido' && '👗'}
-                    {!['Camisa', 'Blazer', 'Pantalón', 'Suéter', 'Camiseta', 'Chaqueta', 'Blusa', 'Cardigan', 'Vestido'].includes(prenda.tipo) && '👕'}
-                  </div>
                   <div style={styles.prendaInfo}>
                     <h4 style={styles.prendaTipo}>{prenda.tipo}</h4>
                     <p style={styles.prendaDescripcion}>{prenda.descripcion}</p>
@@ -142,20 +130,14 @@ const styles = {
     gap: '1rem',
   },
   prendaCard: {
-    display: 'flex',
-    gap: '1rem',
     padding: '1rem',
     backgroundColor: '#f8f9fa',
     borderRadius: '12px',
     border: '2px solid #e9ecef',
     transition: 'all 0.2s ease',
   },
-  prendaIcon: {
-    fontSize: '2rem',
-    flexShrink: 0,
-  },
   prendaInfo: {
-    flex: 1,
+    width: '100%',
   },
   prendaTipo: {
     fontSize: '1rem',
