@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import Chatbot from './Chatbot';
 
@@ -49,7 +49,6 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        margin: '2rem 0 3rem',
         width: '100%',
         maxWidth: '600px',
         margin: '0 auto',
@@ -228,7 +227,6 @@ const styles = {
             position: 'absolute',
             left: 0,
             bottom: 0,
-            width: '40px',
             width: '60px',
             height: '3px',
             background: 'linear-gradient(90deg, #4f46e5, #818cf8)',
@@ -436,7 +434,10 @@ const ImageUploader = () => {
         try {
             const base64Image = await getBase64(file);
             const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-flash"
+                model: "gemini-2.5-flash",
+                generationConfig: {
+                    responseMimeType: "application/json"
+                }
             });
 
             // Prompt actualizado para un análisis más dinámico y preciso
@@ -445,7 +446,7 @@ const ImageUploader = () => {
                             Luego, basándote en estas características, determina su estación de color y su forma de cuerpo. 
                             Tienes que hablarle a la persona directamente usando la segunda persona (ej. "tú, tu").
                             
-                            Devuelve la respuesta en formato JSON con la siguiente estructura. El texto en "analisis_general" debe ser único y adaptado a la imagen proporcionada. Las demás propiedades deben ser arrays de objetos con los datos correspondientes.
+                            Devuelve ÚNICAMENTE un objeto JSON válido (sin texto adicional, sin markdown, sin explicaciones) con la siguiente estructura exacta:
 
                             {
                               "analisis_general": "Basándome en tu imagen, pareces tener un tono de piel <tono de piel> con subtonos <subtonos>, ojos <color de ojos> y cabello <color de cabello>. Esto te ubica en la estación de color <estación de color>. Tu forma de cuerpo parece ser <forma de cuerpo>, con <descripción de la forma>. Te recomiendo usar prendas que <recomendación de prendas>",
@@ -497,9 +498,15 @@ const ImageUploader = () => {
             }
 
             try {
-                // Elimina las etiquetas de código y caracteres de formato Markdown
-                const cleanTextResponse = textResponse.replace(/```json\n|\n```|```/g, '').replace(/\*\*(.*?)\*\*/g, '$1');
-                const jsonResponse = JSON.parse(cleanTextResponse);
+                // Intenta parsear directamente, luego limpia si es necesario
+                let jsonResponse;
+                try {
+                    jsonResponse = JSON.parse(textResponse);
+                } catch {
+                    // Si falla, limpia markdown y vuelve a intentar
+                    const cleanTextResponse = textResponse.replace(/```json\n|\n```|```/g, '').replace(/\*\*(.*?)\*\*/g, '$1').trim();
+                    jsonResponse = JSON.parse(cleanTextResponse);
+                }
                 setResponse(jsonResponse);
         // Extract colors from the response for the chatbot
         if (jsonResponse.paleta_colores) {

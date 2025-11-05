@@ -39,7 +39,7 @@ const Chatbot = ({ colors, onClose }) => {
     setIsLoading(true);
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       
       // Create a prompt that includes the color information
       const colorInfo = colors ? `Los colores recomendados son: ${colors.join(', ')}. ` : '';
