@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import Chatbot from './Chatbot';
-
-// Usa la clave de API desde las variables de entorno
-const API_KEY = process.env.REACT_APP_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
+import { analyzeImage as analyzeImageService } from './services/geminiService';
 
 const styles = {
     container: {
@@ -68,22 +64,6 @@ const styles = {
         marginBottom: '1.5rem',
         position: 'relative',
         overflow: 'hidden',
-        '&:hover': {
-            borderColor: '#818cf8',
-            backgroundColor: 'rgba(238, 242, 255, 0.8)',
-            transform: 'translateY(-2px)',
-            boxShadow: '0 4px 20px rgba(99, 102, 241, 0.15)',
-        },
-        '&:active': {
-            transform: 'translateY(0)',
-            boxShadow: '0 2px 10px rgba(99, 102, 241, 0.1)',
-        },
-    },
-    uploadAreaHover: {
-        borderColor: '#3b82f6',
-        backgroundColor: '#f0f7ff',
-        transform: 'translateY(-2px)',
-        boxShadow: '0 6px 12px rgba(59, 130, 246, 0.1)',
     },
     button: {
         padding: '0.875rem 2.5rem',
@@ -98,21 +78,6 @@ const styles = {
         boxShadow: '0 4px 14px rgba(79, 70, 229, 0.3)',
         position: 'relative',
         overflow: 'hidden',
-        '&:hover:not(:disabled)': {
-            backgroundColor: '#4338ca',
-            transform: 'translateY(-2px)',
-            boxShadow: '0 6px 20px rgba(79, 70, 229, 0.4)',
-        },
-        '&:active:not(:disabled)': {
-            transform: 'translateY(0)',
-            boxShadow: '0 2px 10px rgba(79, 70, 229, 0.3)',
-        },
-        '&:disabled': {
-            backgroundColor: '#c7d2fe',
-            cursor: 'not-allowed',
-            boxShadow: 'none',
-            transform: 'none',
-        },
     },
     previewContainer: {
         margin: '2rem auto',
@@ -146,14 +111,6 @@ const styles = {
         margin: '0 auto',
         display: 'block',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-        '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-        },
-    },
-    previewImageHover: {
-        transform: 'scale(1.01)',
-        boxShadow: '0 12px 25px rgba(0, 0, 0, 0.12)',
     },
     responseContainer: {
         marginTop: '3rem',
@@ -164,10 +121,6 @@ const styles = {
         textAlign: 'left',
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
         transition: 'all 0.3s ease',
-        '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: '0 15px 35px rgba(0, 0, 0, 0.08)',
-        },
     },
     uploadIcon: {
         fontSize: '3.5rem',
@@ -205,14 +158,6 @@ const styles = {
         fontSize: '1.75rem',
         zIndex: 999,
         transition: 'all 0.3s ease',
-        '&:hover': {
-            backgroundColor: '#6d28d9',
-            transform: 'translateY(-2px)',
-            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
-        },
-        '&:active': {
-            transform: 'translateY(1px)',
-        },
     },
     colorPaletteTitle: {
         fontSize: '1.25rem',
@@ -222,16 +167,6 @@ const styles = {
         textAlign: 'left',
         position: 'relative',
         paddingBottom: '0.5rem',
-        '&:after': {
-            content: '""',
-            position: 'absolute',
-            left: 0,
-            bottom: 0,
-            width: '60px',
-            height: '3px',
-            background: 'linear-gradient(90deg, #4f46e5, #818cf8)',
-            borderRadius: '3px',
-        },
     },
     colorPalette: {
         display: 'flex',
@@ -244,17 +179,6 @@ const styles = {
         overflowX: 'auto',
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
-        '&::-webkit-scrollbar': {
-            display: 'none',
-        },
-        '& > *': {
-            flex: '0 0 auto',
-            margin: '0',
-        },
-        '@media (max-width: 768px)': {
-            padding: '1rem',
-            gap: '0.75rem',
-        },
     },
     colorCard: {
         width: '140px',
@@ -265,13 +189,6 @@ const styles = {
         boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
         transition: 'all 0.3s ease',
         margin: 0,
-        ':hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
-        },
-        '@media (max-width: 768px)': {
-            width: '120px',
-        },
     },
     colorSwatch: {
         height: '120px',
@@ -313,10 +230,7 @@ const styles = {
         fontFamily: '\'Fira Code\', monospace',
     },
     colorGroup: {
-        marginBottom: '2.5rem',
-        '&:last-child': {
-            marginBottom: '0',
-        },
+        marginBottom: '1rem'
     },
     colorGroupTitle: {
         fontSize: '1.1rem',
@@ -328,16 +242,7 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         gap: '0.75rem',
-        position: 'relative',
-        '::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: '-2px',
-            left: '0',
-            width: '60px',
-            height: '2px',
-            background: '#3b82f6',
-        },
+        position: 'relative'
     },
     loading: {
         margin: '2rem 0',
@@ -352,11 +257,7 @@ const styles = {
         height: '40px',
         border: '3px solid rgba(59, 130, 246, 0.2)',
         borderTopColor: '#3b82f6',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-    },
-    '@keyframes spin': {
-        to: { transform: 'rotate(360deg)' },
+        borderRadius: '50%'
     },
     recommendationsContainer: {
         marginTop: '2.5rem',
@@ -378,10 +279,6 @@ const styles = {
         gap: '1rem',
         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
         transition: 'all 0.3s ease',
-        '&:hover': {
-            transform: 'translateX(4px)',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02)',
-        },
     },
     recommendationText: {
         flexGrow: 1,
@@ -412,16 +309,7 @@ const ImageUploader = () => {
         }
     };
 
-    const getBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = (error) => reject(error);
-        });
-    };
-
-    const analyzeImage = async () => {
+    const handleAnalyzeImage = async () => {
         if (!file) {
             setError("Por favor, sube una imagen primero.");
             return;
@@ -432,94 +320,10 @@ const ImageUploader = () => {
         setError('');
 
         try {
-            const base64Image = await getBase64(file);
-            const model = genAI.getGenerativeModel({
-                model: "gemini-2.5-flash",
-                generationConfig: {
-                    responseMimeType: "application/json"
-                }
-            });
-
-            // Prompt actualizado para un análisis más dinámico y preciso
-            const prompt = `Actúa como un estilista personal y experto en colorimetría. 
-                            Analiza la imagen e identifica el color de la piel, ojos y cabello de la persona. 
-                            Luego, basándote en estas características, determina su estación de color y su forma de cuerpo. 
-                            Tienes que hablarle a la persona directamente usando la segunda persona (ej. "tú, tu").
-                            
-                            Devuelve ÚNICAMENTE un objeto JSON válido (sin texto adicional, sin markdown, sin explicaciones) con la siguiente estructura exacta:
-
-                            {
-                              "analisis_general": "Basándome en tu imagen, pareces tener un tono de piel <tono de piel> con subtonos <subtonos>, ojos <color de ojos> y cabello <color de cabello>. Esto te ubica en la estación de color <estación de color>. Tu forma de cuerpo parece ser <forma de cuerpo>, con <descripción de la forma>. Te recomiendo usar prendas que <recomendación de prendas>",
-                              "entrevistas": [
-                                {"nombre": "Azul Marino", "hex": "#000080"},
-                                {"nombre": "Gris Carbón", "hex": "#36454F"},
-                                {"nombre": "Blanco Roto", "hex": "#F5F5DC"},
-                                {"nombre": "Verde Bosque", "hex": "#228B22"},
-                                {"nombre": "Borgoña", "hex": "#800020"}
-                              ],
-                              "dia_a_dia": [
-                                {"nombre": "Verde Oliva", "hex": "#6B8E23"},
-                                {"nombre": "Naranja Quemado", "hex": "#CC5500"},
-                                {"nombre": "Mostaza", "hex": "#FFDB58"},
-                                {"nombre": "Turquesa", "hex": "#40E0D0"},
-                                {"nombre": "Beige Cálido", "hex": "#F5F5DC"}
-                              ],
-                              "prendas_recomendadas": [
-                                {
-                                  "descripcion": "Un blazer de corte recto en color Gris Carbón para estilizar tu figura."
-                                },
-                                {
-                                  "descripcion": "Un vestido en un tono Azul Marino con cuello en V para alargar tu torso."
-                                },
-                                {
-                                  "descripcion": "Una blusa de seda en un tono Naranja Quemado combinada con pantalones de talle alto de color beige cálido para equilibrar tus proporciones."
-                                }
-                              ]
-                            }`;
-
-            const result = await model.generateContent([
-                prompt,
-                {
-                    inlineData: {
-                        mimeType: file.type,
-                        data: base64Image,
-                    },
-                },
-            ]);
-
-            const textResponse = result.response?.text();
-            
-            // Log de la respuesta cruda para depuración
-            console.log("Respuesta cruda de la IA:", textResponse); 
-
-            if (!textResponse) {
-                setError("No se recibió una respuesta de la IA.");
-                return;
-            }
-
-            try {
-                // Intenta parsear directamente, luego limpia si es necesario
-                let jsonResponse;
-                try {
-                    jsonResponse = JSON.parse(textResponse);
-                } catch {
-                    // Si falla, limpia markdown y vuelve a intentar
-                    const cleanTextResponse = textResponse.replace(/```json\n|\n```|```/g, '').replace(/\*\*(.*?)\*\*/g, '$1').trim();
-                    jsonResponse = JSON.parse(cleanTextResponse);
-                }
-                setResponse(jsonResponse);
-        // Extract colors from the response for the chatbot
-        if (jsonResponse.paleta_colores) {
-            const colors = Object.values(jsonResponse.paleta_colores).flat();
-            setRecommendedColors(colors);
-        }
-            } catch (parseError) {
-                console.error("Error al parsear la respuesta JSON:", parseError);
-                setError("La IA no devolvió un formato JSON válido. Intenta con otra imagen o revisa el prompt.");
-            }
-
+            const result = await analyzeImageService(file);
+            setResponse(result.analysis);
+            setRecommendedColors(result.colors);
         } catch (err) {
-            console.error("Error general en analyzeImage:", err);
             setError(`Ocurrió un error al analizar la imagen: ${err.message}`);
             setResponse(null);
         } finally {
@@ -585,7 +389,7 @@ const ImageUploader = () => {
             <div style={styles.uploadArea}>
                 <input type="file" onChange={handleFileChange} accept="image/*" style={styles.fileInput} />
                 <button
-                    onClick={analyzeImage}
+                    onClick={handleAnalyzeImage}
                     disabled={loading}
                     style={{ ...styles.button, ...(loading && styles.buttonDisabled) }}
                 >

@@ -1,13 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const API_KEY = "AIzaSyApwkRPpjCzIqnzZXBmXqDD86AtWsDjiKE";
-const genAI = new GoogleGenerativeAI(API_KEY);
+import { generateChatResponse } from './services/geminiService';
+import { CHATBOT_INITIAL_MESSAGE, getChatbotPrompt } from './constants/prompts';
 
 const Chatbot = ({ colors, onClose }) => {
   const [messages, setMessages] = useState([
     {
-      text: "¡Hola! Soy tu asistente de estilo personal. Puedo recomendarte prendas que combinen con tus colores. ¿Qué tipo de prenda te gustaría buscar?",
+      text: CHATBOT_INITIAL_MESSAGE,
       sender: 'bot',
       timestamp: new Date()
     }
@@ -39,18 +37,9 @@ const Chatbot = ({ colors, onClose }) => {
     setIsLoading(true);
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      
-      // Create a prompt that includes the color information
-      const colorInfo = colors ? `Los colores recomendados son: ${colors.join(', ')}. ` : '';
-      
-      const prompt = `Eres un asistente de moda y estilo. ${colorInfo}El usuario pregunta: "${input}"\n\n` +
-        `Responde de manera amigable y profesional en español. Incluye recomendaciones específicas de prendas, estilos o combinaciones que funcionen con los colores mencionados. ` +
-        `Si el usuario no ha especificado un tipo de prenda, sugiere algunas opciones. Mantén las respuestas concisas y útiles.`;
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      const colorNames = colors?.map(c => c.nombre) || [];
+      const prompt = getChatbotPrompt(colorNames, input);
+      const text = await generateChatResponse(prompt);
 
       setMessages(prev => [...prev, {
         text: text,
@@ -105,9 +94,9 @@ const Chatbot = ({ colors, onClose }) => {
         {isLoading && (
           <div style={{ ...styles.message, ...styles.botMessage }}>
             <div style={styles.typingIndicator}>
-              <span></span>
-              <span></span>
-              <span></span>
+              <span style={styles.typingDot}></span>
+              <span style={styles.typingDot}></span>
+              <span style={styles.typingDot}></span>
             </div>
           </div>
         )}
@@ -186,9 +175,6 @@ const styles = {
     justifyContent: 'center',
     width: '32px',
     height: '32px',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    },
   },
   messagesContainer: {
     flex: 1,
@@ -231,24 +217,13 @@ const styles = {
     display: 'flex',
     gap: '4px',
     padding: '0.5rem 0',
-    '& span': {
-      width: '8px',
-      height: '8px',
-      backgroundColor: '#9ca3af',
-      borderRadius: '50%',
-      display: 'inline-block',
-      animation: 'bounce 1.4s infinite ease-in-out both',
-    },
-    '& span:nth-child(1)': {
-      animationDelay: '-0.32s',
-    },
-    '& span:nth-child(2)': {
-      animationDelay: '-0.16s',
-    },
-    '@keyframes bounce': {
-      '0%, 80%, 100%': { transform: 'scale(0.6)' },
-      '40%': { transform: 'scale(1)' },
-    },
+  },
+  typingDot: {
+    width: '8px',
+    height: '8px',
+    backgroundColor: '#9ca3af',
+    borderRadius: '50%',
+    display: 'inline-block',
   },
   inputContainer: {
     display: 'flex',
@@ -264,10 +239,6 @@ const styles = {
     fontSize: '0.95rem',
     outline: 'none',
     transition: 'border-color 0.2s, box-shadow 0.2s',
-    '&:focus': {
-      borderColor: '#7c3aed',
-      boxShadow: '0 0 0 3px rgba(124, 58, 237, 0.1)',
-    },
   },
   sendButton: {
     marginLeft: '0.75rem',
@@ -279,17 +250,6 @@ const styles = {
     cursor: 'pointer',
     fontWeight: 500,
     transition: 'background-color 0.2s, transform 0.1s',
-    '&:hover': {
-      backgroundColor: '#6d28d9',
-    },
-    '&:active': {
-      transform: 'scale(0.98)',
-    },
-    '&:disabled': {
-      backgroundColor: '#d1d5db',
-      cursor: 'not-allowed',
-      transform: 'none',
-    },
   },
 };
 
